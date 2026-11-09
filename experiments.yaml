@@ -1,0 +1,73 @@
+tasks:
+  dr:
+    negative_labels: [0]
+    positive_labels: [1]
+  amd:
+    negative_labels: [0, 1, 2, 255]
+    positive_labels: [3]
+  glaucoma:
+    excluded_labels: [255]
+    negative_labels: [-1, 0]
+    positive_labels: [1]
+
+groups:
+  0: sex
+  1: race
+  2: ethnic
+  3: language
+
+baseline_models:
+  wide_resnet:
+    entrypoint: train_wideresnet.py
+    experiments:
+      dr: wresnet_dr_baseline
+      amd: wresnet_amd_baseline
+      glaucoma: wresnet_glaucoma_E2
+  efficientnet:
+    entrypoint: train_eff.py
+    experiments:
+      dr: eff_dr_baseline
+      amd: eff_amd
+      glaucoma: eff_glaucoma
+  vit:
+    entrypoint: train_trm.py
+    model_argument: ViT
+    experiments:
+      dr: trm_dr_baseline
+      amd: trm_amdbin_baseline
+      glaucoma: vit_glaucoma
+
+fairness_models:
+  dro:
+    entrypoint: train_trm.py
+    model_argument: ViT
+    experiment_pattern: "trm_{dr|amdbin}_DRO_{group}"
+  adversarial:
+    entrypoint: train_trm_adv.py
+    model_argument: ViT_adv
+    experiment_pattern: "trm_{dr|amdbin}_ADV_{group}"
+  fscl:
+    representation_entrypoint: train_trm_fscl.py
+    finetune_entrypoint: train_trm_fsclft.py
+    experiment_pattern: "trm_{dr|amdbin}_FSCL_{group}_finetune"
+  fis:
+    entrypoint: train_trm_fis.py
+    model_argument: ViT_fis
+    experiment_pattern: "trm_{dr|amdbin}_FIS_{group}"
+
+vision_language_models:
+  llava:
+    entrypoint: train_llava_ft_final.py
+    pretrained_model: llava-hf/llava-1.5-7b-hf
+  qwen2_vl:
+    entrypoint: train_qwen_ft.py
+    pretrained_model: Qwen/Qwen2-VL-7B-Instruct
+  medgemma_27b:
+    entrypoint: train_medgemma_ft2.py
+    pretrained_model: google/medgemma-27b-it
+
+analysis:
+  bootstrap: analysis/bootstrap_cnn_vit_results.py
+  metadata_baselines: analysis/metadata_only_baselines.py
+  image_metadata_delta: analysis/metadata_vs_image_delta_metrics.py
+  fairness_inference: analysis/fairness_strategy_paired_tests_corrected.py

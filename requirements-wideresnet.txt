@@ -1,0 +1,2 @@
+-r requirements.txt
+mxnet==1.9.1
